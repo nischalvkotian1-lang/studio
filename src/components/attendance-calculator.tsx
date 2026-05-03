@@ -80,10 +80,8 @@ export function AttendanceCalculator() {
     let required = 0
 
     if (isAboveTarget) {
-      // Formula: (attended) / (total + x) >= targetPercentage / 100
       bunkable = Math.floor((attendedNum * 100 / targetNum) - totalNum)
     } else {
-      // Formula: (attended + x) / (total + x) >= targetPercentage / 100
       required = Math.ceil((targetNum * totalNum - 100 * attendedNum) / (100 - targetNum))
     }
 
@@ -122,45 +120,35 @@ export function AttendanceCalculator() {
     })
   }
 
-  const handleShare = async () => {
-    if (!stats) return
-
-    // Clean URL: Remove trailing slashes or queries
-    const shareUrl = window.location.href.split('?')[0].replace(/\/$/, "");
+  const handleShareWebsite = async () => {
+    const shareUrl = window.location.origin
     const shareTitle = 'College Attendance Calculator'
-    const shareText = stats.isAboveTarget 
-      ? `My attendance is ${stats.currentPercentage}%! I can bunk ${stats.bunkable} more classes 😂.`
-      : `My attendance is ${stats.currentPercentage}%... I need to attend ${stats.required} more classes 😭.`
+    const shareText = 'Bro check this College Attendance Calculator 😂'
 
-    const fullMessage = `${shareText}\n\nCheck your attendance here: ${shareUrl}`
-
-    // Attempt native share with better metadata handling
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
           title: shareTitle,
-          text: fullMessage,
+          text: shareText,
           url: shareUrl,
         })
         return
       } catch (err) {
-        // Standard AbortError happens when user cancels, ignore it
         if ((err as Error).name === 'AbortError') return
       }
     }
 
-    // Fallback to Clipboard API
     try {
-      await navigator.clipboard.writeText(fullMessage)
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
       toast({
         title: "Link Copied!",
-        description: "Stats copied to clipboard. Paste it in your group chat!",
+        description: "Website link copied to clipboard. Send it to your friends!",
       })
     } catch (err) {
       toast({
         variant: "destructive",
-        title: "Sharing failed",
-        description: "Please copy the URL manually from your browser.",
+        title: "Copy failed",
+        description: "Please copy the URL manually from your browser address bar.",
       })
     }
   }
@@ -233,24 +221,24 @@ export function AttendanceCalculator() {
             </Tabs>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Button 
               variant="outline" 
               onClick={handleReset}
               className="flex-1 h-12 border-white/5 hover:bg-white/5 transition-all font-bold"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Reset
+              Reset Data
             </Button>
-            {stats && (
-              <Button 
-                onClick={handleShare}
-                className="flex-1 h-12 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Results
-              </Button>
-            )}
+            <Button 
+              onClick={handleShareWebsite}
+              className="flex-1 h-12 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 transition-all relative group overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Share2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
+              Share Website
+              <div className="absolute -inset-1 bg-primary/20 blur-xl group-hover:bg-primary/40 transition-all -z-10" />
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'VTU Attendance Calculator',
+  title: 'College Attendance Calculator',
   description: 'The ultimate bunking companion for students. Precise calculations, student-friendly messages, and mobile optimization.',
 };
 

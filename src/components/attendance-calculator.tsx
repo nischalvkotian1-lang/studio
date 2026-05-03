@@ -95,7 +95,6 @@ export function AttendanceCalculator() {
       status = 'danger'
     }
 
-    // Get a deterministic random message based on the status and values to avoid hydration flickering
     const messageIndex = (totalNum + attendedNum) % FUNNY_MESSAGES[status].length
     const funnyMessage = FUNNY_MESSAGES[status][messageIndex]
 
@@ -130,7 +129,7 @@ export function AttendanceCalculator() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'VTU Attendance Calculator',
+          title: 'College Attendance Calculator',
           text: shareText,
           url: window.location.href,
         })
@@ -154,7 +153,7 @@ export function AttendanceCalculator() {
           Academic Tool
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white font-headline leading-tight">
-          VTU <span className="text-electric">Attendance</span>
+          College <span className="text-electric">Attendance</span>
         </h1>
         <p className="text-muted-foreground font-body text-base md:text-lg max-w-md mx-auto">
           Calculate your bunking freedom with mathematical precision.
@@ -186,7 +185,7 @@ export function AttendanceCalculator() {
                 onChange={(e) => setTotal(e.target.value)}
                 className="h-12 bg-zinc-900/50 border-white/5 text-lg focus:ring-primary/50 transition-all"
               />
-              <p className="text-[10px] text-muted-foreground uppercase tracking-tight">Total sessions held so far</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-tight">Enter the total number of classes held by the teacher so far.</p>
             </div>
             <div className="space-y-3">
               <Label htmlFor="attended" className="text-sm font-semibold">Classes Attended</Label>
@@ -295,7 +294,7 @@ export function AttendanceCalculator() {
               <Card className="glass-card border-emerald-500/10 hover:border-emerald-500/30 transition-all group">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div className="space-y-1">
-                    <CardDescription className="text-emerald-500/80 font-bold uppercase text-[10px] tracking-widest">Bunk Permit</CardDescription>
+                    <CardDescription className="text-emerald-500/80 font-bold uppercase text-[10px] tracking-widest">Safe bunk classes available</CardDescription>
                     <CardTitle className="text-5xl font-black text-emerald-400">
                       {stats.bunkable}
                     </CardTitle>
@@ -312,7 +311,7 @@ export function AttendanceCalculator() {
               <Card className="glass-card border-rose-500/10 hover:border-rose-500/30 transition-all group">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div className="space-y-1">
-                    <CardDescription className="text-rose-500/80 font-bold uppercase text-[10px] tracking-widest">Recovery Mission</CardDescription>
+                    <CardDescription className="text-rose-500/80 font-bold uppercase text-[10px] tracking-widest">Classes needed to recover target attendance</CardDescription>
                     <CardTitle className="text-5xl font-black text-rose-400">
                       {stats.required}
                     </CardTitle>
@@ -347,7 +346,7 @@ export function AttendanceCalculator() {
       )}
 
       <footer className="text-center pt-12 space-y-4 opacity-50 hover:opacity-100 transition-opacity">
-        <p className="text-[10px] font-black tracking-[0.3em] uppercase text-zinc-500">VTU Precision Analytics &bull; Est 2024</p>
+        <p className="text-[10px] font-black tracking-[0.3em] uppercase text-zinc-500">Precision Academic Analytics &bull; Est 2024</p>
         <div className="flex justify-center gap-6">
            <div className="w-1 h-1 rounded-full bg-zinc-800" />
            <div className="w-1 h-1 rounded-full bg-zinc-800" />

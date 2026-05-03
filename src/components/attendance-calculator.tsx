@@ -52,7 +52,7 @@ export function AttendanceCalculator() {
       } else if (currentP >= 50) {
         insight = `Time to focus. You need to attend the next ${required} classes to get back on track. Consistency is key now.`
       } else {
-        insight = `Critical status. It's imperative that you attend your next ${required} classes. Consider meeting your coordinator to discuss your plan.`
+        insight = `Critical status. It's imperative that you attend your next ${required} classes. Consider speaking with your professor to discuss your progress.`
       }
     }
 
@@ -74,8 +74,8 @@ export function AttendanceCalculator() {
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6 px-4 py-8 animate-fade-in">
       <div className="space-y-2 text-center">
-        <h1 className="text-4xl font-bold tracking-tight gradient-text font-headline">AttendSync</h1>
-        <p className="text-muted-foreground font-body">Track your VTU attendance with modern precision.</p>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text font-headline">College Attendance Calculator</h1>
+        <p className="text-muted-foreground font-body">Track your academic progress with precision.</p>
       </div>
 
       <Card className="glass-card shadow-2xl">
@@ -115,9 +115,10 @@ export function AttendanceCalculator() {
           <div className="space-y-3">
             <Label>Target Percentage</Label>
             <Tabs value={target} onValueChange={setTarget} className="w-full">
-              <TabsList className="grid grid-cols-2 w-full bg-background/50">
-                <TabsTrigger value="75" className="data-[state=active]:bg-primary">75% (Standard)</TabsTrigger>
-                <TabsTrigger value="85" className="data-[state=active]:bg-primary">85% (Distinction)</TabsTrigger>
+              <TabsList className="grid grid-cols-3 w-full bg-background/50">
+                <TabsTrigger value="75" className="data-[state=active]:bg-primary">75%</TabsTrigger>
+                <TabsTrigger value="80" className="data-[state=active]:bg-primary">80%</TabsTrigger>
+                <TabsTrigger value="85" className="data-[state=active]:bg-primary">85%</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -159,7 +160,7 @@ export function AttendanceCalculator() {
                     "text-xs font-bold uppercase",
                     stats.status === 'safe' ? "text-emerald-500" : (stats.status === 'warning' ? "text-amber-500" : "text-rose-500")
                   )}>
-                    {stats.status === 'safe' ? "Excellent Standing" : (stats.status === 'warning' ? "Near Margin" : "Critical Status")}
+                    {stats.status === 'safe' ? "Excellent Standing" : (stats.status === 'warning' ? "Near Margin" : "Below Target")}
                   </span>
                 </div>
               </div>
@@ -208,7 +209,7 @@ export function AttendanceCalculator() {
             <CardContent className="p-6">
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Smart Insight</p>
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Status Insight</p>
                   <p className="text-sm italic text-foreground/90 leading-relaxed">
                     &ldquo;{stats.insight}&rdquo;
                   </p>
@@ -220,7 +221,7 @@ export function AttendanceCalculator() {
       )}
 
       <footer className="text-center pt-8 opacity-30">
-        <p className="text-xs font-body tracking-widest uppercase">AttendSync &bull; Purely Local Calculations</p>
+        <p className="text-xs font-body tracking-widest uppercase">College Attendance Calculator &bull; Local Logic</p>
       </footer>
     </div>
   )

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Calculator, CheckCircle2, XCircle, Info, RefreshCw, Zap, Lightbulb } from "lucide-react"
+import { Calculator, CheckCircle2, XCircle, Info, RefreshCw, Lightbulb } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,12 +13,12 @@ import { cn } from "@/lib/utils"
 export function AttendanceCalculator() {
   const [total, setTotal] = React.useState<string>("")
   const [attended, setAttended] = React.useState<string>("")
-  const [target, setTarget] = React.useState<string>("75")
+  const [target, setTarget] = React.useState<string>("85")
 
   const stats = React.useMemo(() => {
     const totalNum = parseInt(total) || 0
     const attendedNum = parseInt(attended) || 0
-    const targetNum = parseInt(target) || 75
+    const targetNum = parseInt(target) || 85
 
     if (totalNum <= 0) return null
 
@@ -41,8 +41,8 @@ export function AttendanceCalculator() {
     if (currentP >= targetNum) {
       if (currentP > 95) {
         insight = "Excellent! You have a near-perfect record. You're in a great position to bunk a few classes if you need extra study time."
-      } else if (currentP >= 85) {
-        insight = `Great job! You're consistently hitting high numbers. You can safely miss ${bunkable} classes while staying above ${targetNum}%.`
+      } else if (currentP >= 90) {
+        insight = `Fantastic! You're consistently hitting high numbers. You can safely miss ${bunkable} classes while staying above ${targetNum}%.`
       } else {
         insight = `You're doing well! Staying above the target. You have a cushion of ${bunkable} classes.`
       }

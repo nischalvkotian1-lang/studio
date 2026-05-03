@@ -17,7 +17,8 @@ const FUNNY_MESSAGES = {
     "Bunk approved 😂",
     "You're a scholar, take a break 🎓",
     "Teacher's pet? Maybe. Safe? Definitely. ✅",
-    "Attendance is on point, your future is bright (for now) ✨",
+    "Attendance is on point, your future is bright ✨",
+    "The principal would be proud of you 👏",
   ],
   warning: [
     "Careful bro 👀",
@@ -25,6 +26,7 @@ const FUNNY_MESSAGES = {
     "Walking on thin ice 🧊",
     "The warden is watching 👮‍♂️",
     "Don't test your luck, just attend the next one 🚶‍♂️",
+    "Your attendance is gasping for air 😮‍💨",
   ],
   danger: [
     "Bro go to class 💀",
@@ -32,6 +34,7 @@ const FUNNY_MESSAGES = {
     "Even God can't save this bunk plan ⛪",
     "RIP Attendance 🪦",
     "You're practically a ghost in the classroom 👻",
+    "Start writing that apology letter now 📝",
   ]
 }
 
@@ -122,7 +125,8 @@ export function AttendanceCalculator() {
   const handleShare = async () => {
     if (!stats) return
 
-    const shareUrl = window.location.origin
+    // Clean URL: Remove trailing slashes or queries
+    const shareUrl = window.location.href.split('?')[0].replace(/\/$/, "");
     const shareTitle = 'College Attendance Calculator'
     const shareText = stats.isAboveTarget 
       ? `My attendance is ${stats.currentPercentage}%! I can bunk ${stats.bunkable} more classes 😂.`
@@ -130,32 +134,33 @@ export function AttendanceCalculator() {
 
     const fullMessage = `${shareText}\n\nCheck your attendance here: ${shareUrl}`
 
-    // Check for native share support
+    // Attempt native share with better metadata handling
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
           title: shareTitle,
           text: fullMessage,
+          url: shareUrl,
         })
         return
       } catch (err) {
-        // If user cancelled or other error, fallback to clipboard unless it was an abort
+        // Standard AbortError happens when user cancels, ignore it
         if ((err as Error).name === 'AbortError') return
       }
     }
 
-    // Fallback to clipboard
+    // Fallback to Clipboard API
     try {
       await navigator.clipboard.writeText(fullMessage)
       toast({
-        title: "Link copied!",
-        description: "Results copied to clipboard. Share them with your friends!",
+        title: "Link Copied!",
+        description: "Stats copied to clipboard. Paste it in your group chat!",
       })
     } catch (err) {
       toast({
         variant: "destructive",
         title: "Sharing failed",
-        description: "Could not copy to clipboard. Please share manually.",
+        description: "Please copy the URL manually from your browser.",
       })
     }
   }

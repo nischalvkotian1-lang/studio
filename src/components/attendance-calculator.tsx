@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Calculator, CheckCircle2, XCircle, Info, RefreshCw, Lightbulb, AlertTriangle } from "lucide-react"
+import { Calculator, CheckCircle2, XCircle, RefreshCw, Lightbulb, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,7 +21,7 @@ export function AttendanceCalculator() {
     const targetNum = parseInt(target) || 85
 
     if (totalNum <= 0) return null
-    if (attendedNum > totalNum) return null // Invalid input protection
+    if (attendedNum > totalNum) return null
 
     const currentPercentage = (attendedNum / totalNum) * 100
     const isAboveTarget = currentPercentage >= targetNum
@@ -30,15 +30,11 @@ export function AttendanceCalculator() {
     let required = 0
 
     if (isAboveTarget) {
-      // Formula: Find largest x such that: (attended) / (total + x) >= targetPercentage / 100
-      // attended * 100 / targetPercentage >= total + x
+      // Formula: (attended) / (total + x) >= targetPercentage / 100
       // x <= (attended * 100 / targetPercentage) - total
       bunkable = Math.floor((attendedNum * 100 / targetNum) - totalNum)
     } else {
-      // Formula: Find smallest x such that: (attended + x) / (total + x) >= targetPercentage / 100
-      // (attended + x) * 100 >= targetPercentage * (total + x)
-      // 100*attended + 100*x >= targetPercentage*total + targetPercentage*x
-      // (100 - targetPercentage)*x >= targetPercentage*total - 100*attended
+      // Formula: (attended + x) / (total + x) >= targetPercentage / 100
       // x >= (targetPercentage * total - 100 * attended) / (100 - targetPercentage)
       required = Math.ceil((targetNum * totalNum - 100 * attendedNum) / (100 - targetNum))
     }
@@ -97,7 +93,7 @@ export function AttendanceCalculator() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="total">Total Classes Conducted</Label>
+              <Label htmlFor="total">Total Classes Conducted (Until Now)</Label>
               <Input
                 id="total"
                 type="number"
@@ -106,6 +102,7 @@ export function AttendanceCalculator() {
                 onChange={(e) => setTotal(e.target.value)}
                 className="bg-background/50 border-white/10"
               />
+              <p className="text-xs text-muted-foreground">Enter the total number of classes held by the teacher so far.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="attended">Classes Attended</Label>

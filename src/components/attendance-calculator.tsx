@@ -1,22 +1,19 @@
 "use client"
 
 import * as React from "react"
-import { Calculator, CheckCircle2, XCircle, Info, RefreshCw, Zap } from "lucide-react"
+import { Calculator, CheckCircle2, XCircle, Info, RefreshCw, Zap, Lightbulb } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { getMotivationalAttendanceWarning } from "@/ai/flows/motivational-attendance-warning-flow"
 import { cn } from "@/lib/utils"
 
 export function AttendanceCalculator() {
   const [total, setTotal] = React.useState<string>("")
   const [attended, setAttended] = React.useState<string>("")
   const [target, setTarget] = React.useState<string>("75")
-  const [aiMessage, setAiMessage] = React.useState<string>("")
-  const [isLoadingAi, setIsLoadingAi] = React.useState(false)
 
   const stats = React.useMemo(() => {
     const totalNum = parseInt(total) || 0
@@ -32,59 +29,46 @@ export function AttendanceCalculator() {
     let required = 0
 
     if (isAboveTarget) {
-      // (attended / (total + n)) >= target/100
-      // 100 * attended >= target * (total + n)
-      // (100 * attended / target) - total >= n
       bunkable = Math.floor((100 * attendedNum / targetNum) - totalNum)
     } else {
-      // (attended + m) / (total + m) >= target/100
-      // 100 * (attended + m) >= target * (total + m)
-      // 100A + 100m >= T * total + T * m
-      // m(100 - T) >= T * total - 100A
-      // m = ceil((T * total - 100 * attended) / (100 - T))
       required = Math.ceil((targetNum * totalNum - 100 * attendedNum) / (100 - targetNum))
     }
 
+    const currentP = parseFloat(currentPercentage.toFixed(2))
+    
+    // Local Logic for Motivational Messages
+    let insight = ""
+    if (currentP >= targetNum) {
+      if (currentP > 95) {
+        insight = "Excellent! You have a near-perfect record. You're in a great position to bunk a few classes if you need extra study time."
+      } else if (currentP >= 85) {
+        insight = `Great job! You're consistently hitting high numbers. You can safely miss ${bunkable} classes while staying above ${targetNum}%.`
+      } else {
+        insight = `You're doing well! Staying above the target. You have a cushion of ${bunkable} classes.`
+      }
+    } else {
+      if (currentP >= targetNum - 5) {
+        insight = `You're very close! Attending just ${required} more classes will bring you back to ${targetNum}%. Don't lose hope!`
+      } else if (currentP >= 50) {
+        insight = `Time to focus. You need to attend the next ${required} classes to get back on track. Consistency is key now.`
+      } else {
+        insight = `Critical status. It's imperative that you attend your next ${required} classes. Consider meeting your coordinator to discuss your plan.`
+      }
+    }
+
     return {
-      currentPercentage: parseFloat(currentPercentage.toFixed(2)),
+      currentPercentage: currentP,
       isAboveTarget,
       bunkable: Math.max(0, bunkable),
       required: Math.max(0, required),
-      status: currentPercentage >= targetNum ? 'safe' : (currentPercentage >= targetNum - 5 ? 'warning' : 'danger')
+      status: currentP >= targetNum ? 'safe' : (currentP >= targetNum - 5 ? 'warning' : 'danger'),
+      insight
     }
   }, [total, attended, target])
-
-  const fetchAiWarning = React.useCallback(async () => {
-    if (!stats) return
-    setIsLoadingAi(true)
-    try {
-      const result = await getMotivationalAttendanceWarning({
-        currentAttendancePercentage: stats.currentPercentage,
-        targetAttendancePercentage: parseInt(target),
-        classesToRecover: stats.required || undefined,
-        classesToBunkSafely: stats.bunkable || undefined
-      })
-      setAiMessage(result.message)
-    } catch (error) {
-      console.error("AI warning failed", error)
-    } finally {
-      setIsLoadingAi(false)
-    }
-  }, [stats, target])
-
-  React.useEffect(() => {
-    if (stats) {
-      const timer = setTimeout(() => {
-        fetchAiWarning()
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [stats, fetchAiWarning])
 
   const handleReset = () => {
     setTotal("")
     setAttended("")
-    setAiMessage("")
   }
 
   return (
@@ -217,33 +201,26 @@ export function AttendanceCalculator() {
             </Card>
           </div>
 
-          {(aiMessage || isLoadingAi) && (
-            <Card className="bg-primary/5 border-primary/20 backdrop-blur-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-2">
-                <Zap className="w-4 h-4 text-primary opacity-50" />
-              </div>
-              <CardContent className="p-6">
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Coach Insight</p>
-                    {isLoadingAi ? (
-                      <div className="space-y-2">
-                        <div className="h-4 bg-primary/10 rounded w-3/4 animate-pulse"></div>
-                        <div className="h-4 bg-primary/10 rounded w-1/2 animate-pulse"></div>
-                      </div>
-                    ) : (
-                      <p className="text-sm italic text-foreground/90 leading-relaxed">&ldquo;{aiMessage}&rdquo;</p>
-                    )}
-                  </div>
+          <Card className="bg-primary/5 border-primary/20 backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-2">
+              <Lightbulb className="w-4 h-4 text-primary opacity-50" />
+            </div>
+            <CardContent className="p-6">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Smart Insight</p>
+                  <p className="text-sm italic text-foreground/90 leading-relaxed">
+                    &ldquo;{stats.insight}&rdquo;
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       <footer className="text-center pt-8 opacity-30">
-        <p className="text-xs font-body tracking-widest uppercase">AttendSync &bull; Built for Students</p>
+        <p className="text-xs font-body tracking-widest uppercase">AttendSync &bull; Purely Local Calculations</p>
       </footer>
     </div>
   )

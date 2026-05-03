@@ -1,4 +1,4 @@
-// This file is no longer used. The application uses purely local frontend logic.
+// File removed to prevent potential build/service worker conflicts.
 export async function getMotivationalAttendanceWarning() {
   return { message: "" };
 }

@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: 'College Attendance Calculator',
-  description: 'The ultimate bunking companion for students. Precise calculations, student-friendly messages, and mobile optimization.',
+  description: 'The ultimate bunking companion for students. Precise calculations and mobile optimization.',
 };
 
 export default function RootLayout({

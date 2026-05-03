@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Modern student productivity background",
+      "imageUrl": "https://picsum.photos/seed/productivity/1200/800",
+      "imageHint": "student productivity"
+    }
+  ]
 }

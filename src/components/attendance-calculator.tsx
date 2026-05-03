@@ -80,8 +80,17 @@ export function AttendanceCalculator() {
     let required = 0
 
     if (isAboveTarget) {
+      // Find largest x such that: (attended) / (total + x) >= (target / 100)
+      // attended * 100 >= target * (total + x)
+      // attended * 100 / target >= total + x
+      // x <= (attended * 100 / target) - total
       bunkable = Math.floor((attendedNum * 100 / targetNum) - totalNum)
     } else {
+      // Find smallest x such that: (attended + x) / (total + x) >= (target / 100)
+      // (attended + x) * 100 >= target * (total + x)
+      // 100 * attended + 100 * x >= target * total + target * x
+      // (100 - target) * x >= target * total - 100 * attended
+      // x >= (target * total - 100 * attended) / (100 - target)
       required = Math.ceil((targetNum * totalNum - 100 * attendedNum) / (100 - targetNum))
     }
 
@@ -96,6 +105,7 @@ export function AttendanceCalculator() {
       status = 'danger'
     }
 
+    // Use a hash of total/attended to keep the same message for the same inputs
     const messageIndex = (totalNum + attendedNum) % FUNNY_MESSAGES[status].length
     const funnyMessage = FUNNY_MESSAGES[status][messageIndex]
 
@@ -134,10 +144,12 @@ export function AttendanceCalculator() {
         })
         return
       } catch (err) {
+        // Fallback to clipboard if share was canceled or failed
         if ((err as Error).name === 'AbortError') return
       }
     }
 
+    // Fallback to clipboard
     try {
       await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
       toast({
@@ -155,6 +167,7 @@ export function AttendanceCalculator() {
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6 px-4 py-10 md:py-16 animate-fade-in">
+      {/* Header */}
       <div className="space-y-3 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-2">
           <GraduationCap className="w-3 h-3" />
@@ -168,6 +181,7 @@ export function AttendanceCalculator() {
         </p>
       </div>
 
+      {/* Main Input Card */}
       <Card className="glass-card overflow-hidden">
         <div className="h-1 electric-gradient w-full" />
         <CardHeader className="pb-4">
@@ -243,8 +257,10 @@ export function AttendanceCalculator() {
         </CardContent>
       </Card>
 
+      {/* Results Section */}
       {stats && (
         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+          {/* Main Meter */}
           <Card className={cn(
             "glass-card border-l-8 transition-all duration-500",
             stats.status === 'safe' ? "border-l-emerald-500 shadow-emerald-500/10" : (stats.status === 'warning' ? "border-l-amber-500 shadow-amber-500/10" : "border-l-rose-500 shadow-rose-500/10")
@@ -280,6 +296,7 @@ export function AttendanceCalculator() {
                 </div>
               </div>
 
+              {/* Progress Bar */}
               <div className="mt-8 space-y-2">
                 <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                   <span>Progress to Target</span>
@@ -297,6 +314,7 @@ export function AttendanceCalculator() {
             </CardContent>
           </Card>
 
+          {/* Insight Cards */}
           <div className="grid grid-cols-1 gap-4">
             {stats.isAboveTarget ? (
               <Card className="glass-card border-emerald-500/10 hover:border-emerald-500/30 transition-all group">
@@ -335,6 +353,7 @@ export function AttendanceCalculator() {
             )}
           </div>
 
+          {/* Funny Message Card */}
           <Card className="bg-zinc-950/80 border-white/5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -353,6 +372,7 @@ export function AttendanceCalculator() {
         </div>
       )}
 
+      {/* Footer */}
       <footer className="text-center pt-12 space-y-4 opacity-50 hover:opacity-100 transition-opacity">
         <p className="text-[10px] font-black tracking-[0.3em] uppercase text-zinc-500">Precision Academic Analytics &bull; Est 2024</p>
         <div className="flex justify-center gap-6">

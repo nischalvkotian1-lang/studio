@@ -4,31 +4,26 @@
 
 @layer base {
   :root {
-    --background: 210 15% 15%;
-    --foreground: 210 20% 98%;
-    --card: 210 15% 18%;
-    --card-foreground: 210 20% 98%;
-    --popover: 210 15% 15%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 208 90% 55%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 184 65% 75%;
-    --secondary-foreground: 210 15% 10%;
-    --muted: 210 15% 25%;
-    --muted-foreground: 210 10% 70%;
-    --accent: 184 65% 75%;
-    --accent-foreground: 210 15% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 210 15% 25%;
-    --input: 210 15% 25%;
-    --ring: 208 90% 55%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 208 100% 50%; /* Electric Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 208 100% 50%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 208 100% 50%;
     --radius: 1rem;
-    --chart-1: 208 90% 55%;
-    --chart-2: 184 65% 75%;
-    --chart-3: 160 60% 45%;
-    --chart-4: 30 80% 55%;
-    --chart-5: 340 75% 55%;
   }
 }
 
@@ -39,15 +34,29 @@
   body {
     @apply bg-background text-foreground selection:bg-primary/30;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(208, 90%, 55%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(184, 65%, 75%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(208, 100%, 50%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(208, 100%, 50%, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+.glass-card {
+  @apply bg-zinc-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
 }
 
-.glass-card {
-  @apply bg-card/50 backdrop-blur-xl border border-white/5;
+.electric-gradient {
+  @apply bg-gradient-to-br from-primary via-blue-600 to-indigo-700;
+}
+
+.text-electric {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 font-bold;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s infinite ease-in-out;
 }

@@ -122,25 +122,40 @@ export function AttendanceCalculator() {
   const handleShare = async () => {
     if (!stats) return
 
+    const shareUrl = window.location.origin
+    const shareTitle = 'College Attendance Calculator'
     const shareText = stats.isAboveTarget 
-      ? `My attendance is ${stats.currentPercentage}%! I can bunk ${stats.bunkable} more classes 😂. Check yours here:`
-      : `My attendance is ${stats.currentPercentage}%... I need to attend ${stats.required} classes 😭. Check yours here:`
+      ? `My attendance is ${stats.currentPercentage}%! I can bunk ${stats.bunkable} more classes 😂.`
+      : `My attendance is ${stats.currentPercentage}%... I need to attend ${stats.required} more classes 😭.`
 
-    if (navigator.share) {
+    const fullMessage = `${shareText}\n\nCheck your attendance here: ${shareUrl}`
+
+    // Check for native share support
+    if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: 'College Attendance Calculator',
-          text: shareText,
-          url: window.location.href,
+          title: shareTitle,
+          text: fullMessage,
         })
+        return
       } catch (err) {
-        console.error("Error sharing", err)
+        // If user cancelled or other error, fallback to clipboard unless it was an abort
+        if ((err as Error).name === 'AbortError') return
       }
-    } else {
-      navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
+    }
+
+    // Fallback to clipboard
+    try {
+      await navigator.clipboard.writeText(fullMessage)
       toast({
         title: "Link copied!",
-        description: "Share it with your bunk partners.",
+        description: "Results copied to clipboard. Share them with your friends!",
+      })
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Sharing failed",
+        description: "Could not copy to clipboard. Please share manually.",
       })
     }
   }
@@ -173,7 +188,7 @@ export function AttendanceCalculator() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <Label htmlFor="total" className="text-sm font-semibold flex items-center gap-2">
-                Total Classes (Until Now)
+                Total Classes Conducted (Until Now)
                 <Info className="w-3 h-3 text-muted-foreground" />
               </Label>
               <Input
@@ -228,7 +243,7 @@ export function AttendanceCalculator() {
                 className="flex-1 h-12 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
               >
                 <Share2 className="w-4 h-4 mr-2" />
-                Share
+                Share Results
               </Button>
             )}
           </div>

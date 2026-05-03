@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Calculator, CheckCircle2, XCircle, Info, RefreshCw, Lightbulb } from "lucide-react"
+import { Calculator, CheckCircle2, XCircle, Info, RefreshCw, Lightbulb, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,6 +21,7 @@ export function AttendanceCalculator() {
     const targetNum = parseInt(target) || 85
 
     if (totalNum <= 0) return null
+    if (attendedNum > totalNum) return null // Invalid input protection
 
     const currentPercentage = (attendedNum / totalNum) * 100
     const isAboveTarget = currentPercentage >= targetNum
@@ -29,31 +30,37 @@ export function AttendanceCalculator() {
     let required = 0
 
     if (isAboveTarget) {
-      bunkable = Math.floor((100 * attendedNum / targetNum) - totalNum)
+      // Formula: Find largest x such that: (attended) / (total + x) >= targetPercentage / 100
+      // attended * 100 / targetPercentage >= total + x
+      // x <= (attended * 100 / targetPercentage) - total
+      bunkable = Math.floor((attendedNum * 100 / targetNum) - totalNum)
     } else {
+      // Formula: Find smallest x such that: (attended + x) / (total + x) >= targetPercentage / 100
+      // (attended + x) * 100 >= targetPercentage * (total + x)
+      // 100*attended + 100*x >= targetPercentage*total + targetPercentage*x
+      // (100 - targetPercentage)*x >= targetPercentage*total - 100*attended
+      // x >= (targetPercentage * total - 100 * attended) / (100 - targetPercentage)
       required = Math.ceil((targetNum * totalNum - 100 * attendedNum) / (100 - targetNum))
     }
 
     const currentP = parseFloat(currentPercentage.toFixed(2))
     
-    // Local Logic for Motivational Messages
+    let status: 'safe' | 'warning' | 'danger' = 'safe'
     let insight = ""
+
     if (currentP >= targetNum) {
+      status = 'safe'
       if (currentP > 95) {
-        insight = "Excellent! You have a near-perfect record. You're in a great position to bunk a few classes if you need extra study time."
-      } else if (currentP >= 90) {
-        insight = `Fantastic! You're consistently hitting high numbers. You can safely miss ${bunkable} classes while staying above ${targetNum}%.`
+        insight = "Excellent standing! Your attendance is top-tier. You can safely prioritize other tasks if needed."
       } else {
-        insight = `You're doing well! Staying above the target. You have a cushion of ${bunkable} classes.`
+        insight = `You're in the safe zone. You have a cushion of ${bunkable} classes to maintain your ${targetNum}% target.`
       }
+    } else if (currentP >= targetNum - 5) {
+      status = 'warning'
+      insight = `You're slightly below the margin. Attending the next ${required} classes consecutively will bring you back to ${targetNum}%.`
     } else {
-      if (currentP >= targetNum - 5) {
-        insight = `You're very close! Attending just ${required} more classes will bring you back to ${targetNum}%. Don't lose hope!`
-      } else if (currentP >= 50) {
-        insight = `Time to focus. You need to attend the next ${required} classes to get back on track. Consistency is key now.`
-      } else {
-        insight = `Critical status. It's imperative that you attend your next ${required} classes. Consider speaking with your professor to discuss your progress.`
-      }
+      status = 'danger'
+      insight = `Critical status. You need to attend ${required} more classes without fail to recover your ${targetNum}% attendance.`
     }
 
     return {
@@ -61,8 +68,9 @@ export function AttendanceCalculator() {
       isAboveTarget,
       bunkable: Math.max(0, bunkable),
       required: Math.max(0, required),
-      status: currentP >= targetNum ? 'safe' : (currentP >= targetNum - 5 ? 'warning' : 'danger'),
-      insight
+      status,
+      insight,
+      targetNum
     }
   }, [total, attended, target])
 
@@ -146,7 +154,7 @@ export function AttendanceCalculator() {
                   <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Current Attendance</p>
                   <div className="flex items-baseline gap-2 justify-center md:justify-start">
                     <span className="text-5xl font-black text-foreground">{stats.currentPercentage}%</span>
-                    <span className="text-muted-foreground">/ {target}%</span>
+                    <span className="text-muted-foreground">/ {stats.targetNum}%</span>
                   </div>
                 </div>
                 <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
@@ -154,13 +162,13 @@ export function AttendanceCalculator() {
                     "p-3 rounded-full",
                     stats.status === 'safe' ? "bg-emerald-500/10 text-emerald-500" : (stats.status === 'warning' ? "bg-amber-500/10 text-amber-500" : "bg-rose-500/10 text-rose-500")
                   )}>
-                    {stats.status === 'safe' ? <CheckCircle2 className="w-8 h-8" /> : (stats.status === 'warning' ? <Info className="w-8 h-8" /> : <XCircle className="w-8 h-8" />)}
+                    {stats.status === 'safe' ? <CheckCircle2 className="w-8 h-8" /> : (stats.status === 'warning' ? <AlertTriangle className="w-8 h-8" /> : <XCircle className="w-8 h-8" />)}
                   </div>
                   <span className={cn(
                     "text-xs font-bold uppercase",
                     stats.status === 'safe' ? "text-emerald-500" : (stats.status === 'warning' ? "text-amber-500" : "text-rose-500")
                   )}>
-                    {stats.status === 'safe' ? "Excellent Standing" : (stats.status === 'warning' ? "Near Margin" : "Below Target")}
+                    {stats.status === 'safe' ? "Safe Zone" : (stats.status === 'warning' ? "Near Margin" : "Below Target")}
                   </span>
                 </div>
               </div>
@@ -175,31 +183,33 @@ export function AttendanceCalculator() {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="glass-card">
-              <CardHeader className="pb-2">
-                <CardDescription>Bunk Safe Zone</CardDescription>
-                <CardTitle className="text-3xl font-bold flex items-center gap-2">
-                  <span className={stats.bunkable > 0 ? "text-primary" : "text-muted-foreground"}>{stats.bunkable}</span>
-                  <span className="text-sm font-normal text-muted-foreground">Classes</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">Number of classes you can miss without dropping below {target}%.</p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card">
-              <CardHeader className="pb-2">
-                <CardDescription>Recovery Required</CardDescription>
-                <CardTitle className="text-3xl font-bold flex items-center gap-2">
-                  <span className={stats.required > 0 ? "text-accent" : "text-muted-foreground"}>{stats.required}</span>
-                  <span className="text-sm font-normal text-muted-foreground">Classes</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">Additional classes to attend to reach your {target}% goal.</p>
-              </CardContent>
-            </Card>
+            {stats.isAboveTarget ? (
+              <Card className="glass-card md:col-span-2 border-emerald-500/20">
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-emerald-500/80 font-medium">Safe bunk classes available</CardDescription>
+                  <CardTitle className="text-4xl font-bold flex items-center gap-3">
+                    <span className="text-emerald-500">{stats.bunkable}</span>
+                    <span className="text-lg font-normal text-muted-foreground">Classes can be missed</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">You can safely miss {stats.bunkable} future classes while staying above your {stats.targetNum}% target.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="glass-card md:col-span-2 border-rose-500/20">
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-rose-500/80 font-medium">Classes needed to recover target attendance</CardDescription>
+                  <CardTitle className="text-4xl font-bold flex items-center gap-3">
+                    <span className="text-rose-500">{stats.required}</span>
+                    <span className="text-lg font-normal text-muted-foreground">Classes to attend</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">You must attend the next {stats.required} classes consecutively to reach your {stats.targetNum}% goal.</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <Card className="bg-primary/5 border-primary/20 backdrop-blur-sm relative overflow-hidden">
@@ -209,7 +219,7 @@ export function AttendanceCalculator() {
             <CardContent className="p-6">
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Status Insight</p>
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Calculation Insight</p>
                   <p className="text-sm italic text-foreground/90 leading-relaxed">
                     &ldquo;{stats.insight}&rdquo;
                   </p>
@@ -221,7 +231,7 @@ export function AttendanceCalculator() {
       )}
 
       <footer className="text-center pt-8 opacity-30">
-        <p className="text-xs font-body tracking-widest uppercase">College Attendance Calculator &bull; Local Logic</p>
+        <p className="text-xs font-body tracking-widest uppercase">College Attendance Calculator &bull; Precise Logic Enabled</p>
       </footer>
     </div>
   )
